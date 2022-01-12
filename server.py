@@ -118,7 +118,7 @@ def new_post():
         return render_template('new-post.html', form=form, img=img, head=head, subhead=subhead)
 
 
-@app.route('/edit_post/<id>', methods=['GET','POST'])
+@app.route('/edit_post/<id>', methods=['GET', 'POST'])
 def edit_post(id):
     post = BlogPost.query.get(id)
     editform = NewPostForm(title=post.title, subtitle=post.subtitle, img_url=post.img_url, author=post.author, body=post.body)
