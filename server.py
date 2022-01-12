@@ -43,21 +43,6 @@ class NewPostForm(FlaskForm):
     body = CKEditorField("Blog Content", validators=[DataRequired()])
     submit = SubmitField("Submit Post")
 
-# images = ["url('../static/assets/img/cactus.jpg')", "url('../static/assets/img/bored.jpg')", "url('../static/assets/img/fasting.jpg')"]
-# db.create_all()
-# response = requests.get("https://api.npoint.io/4c1b65cf4e0734179b77").json()
-# i = 0
-# for post in response:
-#     new_post = BlogPost(title=post["title"],
-#                     subtitle=post["subtitle"],
-#                     date=func.current_date(),
-#                     body=post["body"],
-#                     author="Diksha",
-#                     img_url=images[i],)
-#     i += 1
-#     db.session.add(new_post)
-#     db.session.commit()
-
 
 def send_mail(msg):
     with smtplib.SMTP("smtp.gmail.com", 587) as connection:
@@ -71,7 +56,6 @@ def send_mail(msg):
 
 @app.route('/')
 def home():
-    # response = requests.get("https://api.npoint.io/4c1b65cf4e0734179b77").json()
     response = BlogPost.query.all()[::-1]
     img = "static/assets/img/home-bg.jpg"
     head = "Diksha's Blog"
@@ -89,7 +73,6 @@ def about():
 
 @app.route('/post/<id>')
 def post(id):
-    # response = requests.get("https://api.npoint.io/4c1b65cf4e0734179b77").json()
     response = BlogPost.query.get(id)
     img = response.img_url
     head = response.title
@@ -138,11 +121,7 @@ def new_post():
 @app.route('/edit_post/<id>', methods=['GET','POST'])
 def edit_post(id):
     post = BlogPost.query.get(id)
-    editform = NewPostForm(title=post.title,
-    subtitle=post.subtitle,
-    img_url=post.img_url,
-    author=post.author,
-    body=post.body)
+    editform = NewPostForm(title=post.title, subtitle=post.subtitle, img_url=post.img_url, author=post.author, body=post.body)
 
     if editform.validate_on_submit():
         post.title = editform.title.data
@@ -159,12 +138,13 @@ def edit_post(id):
         return render_template('edit.html', id=id, img=img, head=head, subhead=subhead, form=editform)
 
 
-
 @app.route('/delete_post/<ide>')
 def delete_post(ide):
     post = BlogPost.query.get(ide)
     db.session.delete(post)
     db.session.commit()
     return redirect(url_for('home'))
+
+
 if __name__ == '__main__':
     app.run(debug=True)
