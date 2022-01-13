@@ -21,7 +21,9 @@
                     <!-- Divider-->
                     <hr class="my-4" />
                     {% endfor %}
+                    {% if is_admin %}
                     <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href={{url_for('new_post')}}>Create New Post</a></div>
+                    {% endif %}
                 </div>
             </div>
         </div>

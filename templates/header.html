@@ -6,7 +6,7 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>Diksha's Blog</title>
-        <link rel="icon" type="image/x-icon" href="static/assets/favicon.ico" />
+        <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
         <!-- Font Awesome icons (free version)-->
         <script src="https://use.fontawesome.com/releases/v5.15.4/static/js/all.js" crossorigin="anonymous"></script>
         <!-- Google fonts-->
@@ -27,9 +27,22 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarResponsive">
                     <ul class="navbar-nav ms-auto py-4 py-lg-0">
+
+                        {% if not logged_in: %}
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{url_for('home')}}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{url_for('login')}}">Login</a></li>
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{url_for('register')}}">Register</a></li>
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{url_for('about')}}">About</a></li>
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{url_for('contact')}}">Contact</a></li>
+                        {% endif %}
+                        {% if logged_in: %}
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{url_for('home')}}">Home</a></li>
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{url_for('about')}}">About</a></li>
                         <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{url_for('contact')}}">Contact</a></li>
+                        <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="{{url_for('logout')}}">Logout</a></li>
+                        {% endif %}
+
+
                     </ul>
                 </div>
             </div>

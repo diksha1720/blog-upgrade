@@ -10,9 +10,10 @@
                         <h2 class="section-heading">{{post.title}}</h2>
 <!--                        <h3 class="section-heading">{{post.subtitle}}</h3>-->
                         <p>{{post.body|safe}}</p>
+                      {% if is_admin %}
                         <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href={{url_for('edit_post', id=post.id)}}>Edit Post</a></div>
                         <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href={{url_for('delete_post', ide=post.id)}}>Delete Post</a></div>
-
+                        {% endif %}
 
                     </div>
                 </div>
