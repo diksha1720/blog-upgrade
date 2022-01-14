@@ -5,11 +5,11 @@ from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import NewPostForm, LoginForm, RegisterForm, CommentForm
 from flask_ckeditor import CKEditor, CKEditorField
-import smtplib
 from datetime import date
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from functools import wraps
 from flask_gravatar import Gravatar
+import webbrowser
 
 
 app = Flask(__name__)
@@ -75,16 +75,6 @@ def admin_only(f):
     return decorated_function
 
 
-def send_mail(msg):
-    with smtplib.SMTP("smtp.gmail.com", 587) as connection:
-        connection.starttls()
-
-        connection.login(user=my_email, password=password)
-        connection.sendmail(from_addr=my_email,
-                            to_addrs=to_address,
-                            msg=msg)
-
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -138,10 +128,9 @@ def contact():
     img = "static/assets/img/contact-bg.jpg"
     subhead = "Have questions? I have answers"
     if request.method == 'POST':
-        send_mail(f"{request.form['name']}\n{request.form['email']}\n{request.form['phone']}\n{request.form['msg']}")
-        head = "Message sent successfully"
-    else:
-        head = "Contact Me"
+        webbrowser.open('mailto:?to=dikshabharti39@gmail.com&subject=Message from Blog &body='f"{request.form['msg']}", new=1)
+
+    head = "Contact Me"
     return render_template("contact.html", img=img, head=head, subhead=subhead, logged_in=current_user.is_authenticated)
 
 
