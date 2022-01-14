@@ -1,18 +1,20 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, abort
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
-from forms import NewPostForm, LoginForm, RegisterForm
+from forms import NewPostForm, LoginForm, RegisterForm, CommentForm
 from flask_ckeditor import CKEditor, CKEditorField
 import smtplib
-from datetime import datetime
+from datetime import date
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-import html
 from functools import wraps
+from flask_gravatar import Gravatar
 
 
 app = Flask(__name__)
 ckeditor = CKEditor(app)
+gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False, force_lower=False, use_ssl=False, base_url=None)
 
 Bootstrap(app)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -28,21 +30,38 @@ password = ""
 to_address = ""
 
 
-class BlogPost(db.Model):
+class User(UserMixin, db.Model):
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
+    name = db.Column(db.String(100))
+    posts = relationship("BlogPost", back_populates="author")
+    comments = relationship("Comment", back_populates="comment_author")
+
+
+class BlogPost(db.Model):
+    __tablename__ = "blog_posts"
+    id = db.Column(db.Integer, primary_key=True)
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    author = relationship("User", back_populates="posts")
     title = db.Column(db.String(250), unique=True, nullable=False)
     subtitle = db.Column(db.String(250), nullable=False)
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
-    author = db.Column(db.String(250), nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
+    comments = relationship("Comment", back_populates="parent_post")
 
 
-class User(UserMixin, db.Model):
+class Comment(UserMixin, db.Model):
+    __tablename__ = "comments"
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
-    name = db.Column(db.String(1000))
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    comment_author = relationship("User", back_populates="comments")
+    post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"))
+    parent_post = relationship("BlogPost", back_populates="comments")
+    text = db.Column(db.Text, nullable=False)
+
 
 # db.create_all()
 
@@ -92,8 +111,17 @@ def about():
     return render_template("about.html", img=img, head=head, subhead=subhead, logged_in=current_user.is_authenticated)
 
 
-@app.route('/post/<id>')
+@app.route('/post/<id>', methods=['POST', 'GET'])
 def post(id):
+    form = CommentForm()
+    if form.validate_on_submit():
+        text = form.comment.data
+        post_id = id
+        author_id = current_user.id
+        new_comment = Comment(author_id=author_id,  post_id=post_id, text=text, )
+        db.session.add(new_comment)
+        db.session.commit()
+        return redirect(url_for('post',id=id))
     response = BlogPost.query.get(id)
     img = response.img_url
     head = response.title
@@ -102,7 +130,7 @@ def post(id):
         is_admin = False
     else:
         is_admin = True
-    return render_template("post.html", img=img, head=head, subhead=subhead, post=response, id=int(id), logged_in=current_user.is_authenticated, is_admin=is_admin)
+    return render_template("post.html", img=img, head=head, subhead=subhead, post=response, id=int(id), form=form , logged_in=current_user.is_authenticated, is_admin=is_admin)
 
 
 @app.route('/contact', methods=['GET', 'POST'])
@@ -124,16 +152,17 @@ def form():
 
 
 @app.route('/new_post', methods=['GET', 'POST'])
-@admin_only
 def new_post():
     form = NewPostForm()
     if form.validate_on_submit():
-        new_post = BlogPost(title=form.title.data,
-                            subtitle=form.subtitle.data,
-                            date=datetime.now().strftime("%B %d, %Y"),
-                            body=form.body.data,
-                            author=form.author.data,
-                            img_url=form.img_url.data,)
+        new_post = BlogPost(
+            title=form.title.data,
+            subtitle=form.subtitle.data,
+            body=form.body.data,
+            img_url=form.img_url.data,
+            author=current_user,
+            date=date.today().strftime("%B %d, %Y")
+        )
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('home'))
@@ -145,7 +174,6 @@ def new_post():
 
 
 @app.route('/edit_post/<id>', methods=['GET', 'POST'])
-@admin_only
 def edit_post(id):
     post = BlogPost.query.get(id)
     editform = NewPostForm(title=post.title, subtitle=post.subtitle, img_url=post.img_url, author=post.author, body=post.body)
@@ -154,7 +182,6 @@ def edit_post(id):
         post.title = editform.title.data
         post.subtitle = editform.subtitle.data
         post.img_url = editform.img_url.data
-        post.author = editform.author.data
         post.body = editform.body.data
         db.session.commit()
         return redirect(url_for('home'))
@@ -166,7 +193,6 @@ def edit_post(id):
 
 
 @app.route('/delete_post/<ide>')
-@admin_only
 def delete_post(ide):
     post = BlogPost.query.get(ide)
     db.session.delete(post)

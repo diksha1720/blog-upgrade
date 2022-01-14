@@ -2,21 +2,40 @@
 <html lang="en">
 
 {% include 'header.html' %}
-
+{% import "bootstrap/wtf.html" as wtf %}
         <article class="mb-4">
             <div class="container px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 justify-content-center">
                     <div class="col-md-10 col-lg-8 col-xl-7">
                         <h2 class="section-heading">{{post.title}}</h2>
 <!--                        <h3 class="section-heading">{{post.subtitle}}</h3>-->
+                        <span class="meta">Posted by
+              {{post.author.name}}
+              on {{post.date}}</span>
                         <p>{{post.body|safe}}</p>
-                      {% if is_admin %}
+                         </div>
+                </div>
+                <div class="col-lg-8 col-md-10 mx-auto comment">
+                    {% for comment in post.comments: %}
+
+                            <div class="commenterImage">
+                                <img style="border-radius: 50%;"src="{{ comment.comment_author.email | gravatar }}" width="40" height="40"/><span class="date sub-text"><h1>   </h1><strong> {{comment.comment_author.name}}</strong></span>
+                            </div>
+                            <div class="commentText">
+                                {{comment.text|safe}}
+                            </div>
+
+                    {% endfor %}
+                </div>
+                {% if is_admin %}
                         <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href={{url_for('edit_post', id=post.id)}}>Edit Post</a></div>
                         <div class="d-flex justify-content-end mb-4"><a class="btn btn-primary text-uppercase" href={{url_for('delete_post', ide=post.id)}}>Delete Post</a></div>
                         {% endif %}
-
-                    </div>
-                </div>
+                        {% if not is_admin and logged_in %}
+                        {{ ckeditor.load() }}
+                        {{ ckeditor.config(name='comment') }}
+                        {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"})}}
+                         {% endif %}
             </div>
         </article>
         <!-- Footer-->
