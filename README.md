@@ -3,7 +3,7 @@
 ###Home Page
 ![Screenshot](static/assets/img/site-img/home-page-1.png)
 
-### Blog Post example
+###Blog Post example
 ![Screenshot](static/assets/img/site-img/blog-post.PNG)
 
 ###About Page
