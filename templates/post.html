@@ -6,14 +6,17 @@
         <article class="mb-4">
             <div class="container px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 justify-content-center">
-                    <div class="col-md-12">
+                    <div class="col-md-10 col-lg-8 col-xl-7">
                         <h2 class="section-heading">{{post.title}}</h2>
                         <span class="meta">Posted by
               {{post.author.name}}
               on {{post.date}}</span>
+
                         {{post.body|safe}}
-                         </div>
-                </div>
+                            </div>
+                            </div>
+
+
                 <div class="col-lg-8 col-md-10 mx-auto comment">
                     {% for comment in post.comments: %}
 
@@ -35,7 +38,7 @@
                         {{ ckeditor.config(name='comment') }}
                         {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"})}}
                          {% endif %}
-            </div>
+           </div>
         </article>
         <!-- Footer-->
 
