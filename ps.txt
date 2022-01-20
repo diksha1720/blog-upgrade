@@ -1,0 +1,10 @@
+my_email = "testmail5290@gmail.com"
+password = "test1234$$$"
+to_address = "dikshabharti222@gmail.com"
+
+
+admin email = "dikshabharti39@gmail.com"
+admin_password = "User123"
+
+user email = "user1@gmail.com"
+user_password = "user123"
